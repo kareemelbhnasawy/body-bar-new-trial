@@ -1,0 +1,9 @@
+Name,Value,Value Type,Type,Discount Class,Minimum Purchase Requirements,Combines with Order Discounts,Combines with Product Discounts,Combines with Shipping Discounts,Customer Selection,Context,Times Used In Total,Applies Once Per Customer,Usage Limit Per Code,Status,Start,End
+alex30,-25.0,percentage,Amount Off,product,,,,,all,all,0,,,Active,2024-11-22 12:43:11 -0500,
+athlete92,-10.0,percentage,Amount Off,order,100.0,,,,all,all,0,,,Active,2024-04-06 16:21:51 -0400,
+bassem15,-15.0,percentage,Amount Off,order,100.0,,,,all,all,0,1,,Active,2024-04-10 04:11:42 -0400,
+Bassem20,-20.0,percentage,Amount Off,product,,,,,all,all,1,,,Active,2024-07-07 23:04:40 -0400,
+BEFITX,-15.0,percentage,Amount Off,order,100.0,,,,all,all,0,,,Active,2024-05-11 05:52:13 -0400,
+Bodybar10,-10.0,percentage,Amount Off,product,,,,,all,all,1,,,Active,2024-06-26 10:10:56 -0400,
+Ramzy15,-15.0,percentage,Amount Off,product,,,,,all,all,0,,,Active,2024-04-28 14:02:24 -0400,
+Studio100,-20.0,percentage,Amount Off,product,200.0,,1,,all,all,0,,1,Active,2024-11-22 12:40:14 -0500,

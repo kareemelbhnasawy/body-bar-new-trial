@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@theme {
+  --color-body-dark: #0a0a0a;
+  --color-body-card: #171717;
+  --color-body-accent: #cfff04;
+  --color-body-secondary: #262626;
+  --color-body-text: #ededed;
+  --color-body-muted: #a3a3a3;
+
+  --font-sans: 'Inter', sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-body-dark);
+    color: var(--color-body-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
