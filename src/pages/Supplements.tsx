@@ -1,22 +1,55 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ProductCard } from '../components/ui/ProductCard';
-import { mockProducts } from '../data/mockData';
+import { useProducts } from '../hooks/useProducts';
 import { Button } from '../components/ui/Button';
+import { Loader2 } from 'lucide-react';
 
 const categories = ['All', 'Amino & Recovery', 'Creatine', 'Protein', 'Energy', 'Vitamins'];
 
 export default function Supplements() {
     const [activeCategory, setActiveCategory] = useState('All');
+    
+    // Fetch live products from Supabase
+    const { products, loading, error } = useProducts('supplements');
 
-    // Filter products based on category (using mock logic)
-    // In a real app, this would query Supabase
-    const products = mockProducts.filter(p =>
-        // Just a basic filter for demonstration since mock data categories might not match exactly
-        // "s" prefix in ID generally implies supplement in our mock data
-        p.id.startsWith('s') &&
-        (activeCategory === 'All' || p.category.includes(activeCategory) || activeCategory === 'Protein' && p.category === 'Mass Gainer')
-    );
+    // Filter products on the client based on category
+    const filteredProducts = products.filter(p => {
+        if (activeCategory === 'All') return true;
+        const name = p.name.toLowerCase();
+        const type = p.category.toLowerCase();
+        
+        switch(activeCategory) {
+            case 'Amino & Recovery':
+                return name.includes('amino') || name.includes('bcaa') || name.includes('glutamine') || type.includes('amino');
+            case 'Creatine':
+                return name.includes('creatine');
+            case 'Protein':
+                return name.includes('protein') || name.includes('mass gainer') || name.includes('whey') || type.includes('protein');
+            case 'Energy':
+                return name.includes('energy') || name.includes('pre') || name.includes('workout');
+            case 'Vitamins':
+                return name.includes('centrum') || name.includes('vitamin') || type.includes('vitamin');
+            default:
+                return true;
+        }
+    });
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-body-dark flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-body-accent animate-spin" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-body-dark flex items-center justify-center text-red-500">
+                Error loading products: {error}
+            </div>
+        );
+    }
 
     return (
         <div className="bg-body-dark min-h-screen py-12">
@@ -55,8 +88,8 @@ export default function Supplements() {
                     transition={{ staggerChildren: 0.1 }}
                     className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
                 >
-                    {products.length > 0 ? (
-                        products.map(product => (
+                    {filteredProducts.length > 0 ? (
+                        filteredProducts.map(product => (
                             <motion.div
                                 key={product.id}
                                 initial={{ opacity: 0, y: 20 }}

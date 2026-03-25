@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import CartDrawer from '../components/CartDrawer';
 import MobileNav from '../components/MobileNav';
+import { NewsletterModal } from '../components/ui/NewsletterModal';
 
 export default function Layout() {
     return (
@@ -15,6 +16,7 @@ export default function Layout() {
             <Footer />
             <CartDrawer />
             <MobileNav />
+            <NewsletterModal />
         </div>
     );
 }

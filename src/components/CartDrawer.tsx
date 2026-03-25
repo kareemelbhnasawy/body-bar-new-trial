@@ -81,7 +81,7 @@ export default function CartDrawer() {
                                                         <Plus size={14} />
                                                     </button>
                                                 </div>
-                                                <span className="font-bold text-body-accent">${(item.price * item.quantity).toFixed(2)}</span>
+                                                <span className="font-bold text-body-accent">AED {(item.price * item.quantity).toFixed(2)}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -94,7 +94,7 @@ export default function CartDrawer() {
                             <div className="p-6 border-t border-white/10 bg-body-card">
                                 <div className="flex items-center justify-between mb-4">
                                     <span className="text-gray-400">Subtotal</span>
-                                    <span className="text-2xl font-bold text-white">${cartTotal.toFixed(2)}</span>
+                                    <span className="text-2xl font-bold text-white">AED {cartTotal.toFixed(2)}</span>
                                 </div>
                                 <Button size="lg" className="w-full bg-body-accent text-white hover:text-black py-4 text-lg" onClick={handleCheckout}>
                                     Checkout

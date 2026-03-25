@@ -1,15 +1,49 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ProductCard } from '../components/ui/ProductCard';
-import { mockProducts } from '../data/mockData';
+import { useProducts } from '../hooks/useProducts';
+import { Loader2 } from 'lucide-react';
 
 export default function GymWear() {
     const [filter, setFilter] = useState<'All' | 'Men' | 'Women'>('All');
 
-    const products = mockProducts.filter(p =>
-        (p.category === 'Men' || p.category === 'Women') && // Using category field from mock data
-        (filter === 'All' || p.category === filter)
-    );
+    const { products, loading, error } = useProducts('gym-wear');
+
+    const filteredProducts = products.filter(p => {
+        if (filter === 'All') return true;
+        
+        const name = p.name.toLowerCase();
+        const cat = p.category.toLowerCase();
+        
+        if (filter === 'Women') {
+            return name.includes('women') || cat.includes('women') || name.includes('ladies');
+        }
+        
+        if (filter === 'Men') {
+            // Must include men but NOT women, to strictly isolate
+            const hasMen = name.includes('men') || cat.includes('men') || name.includes('unisex') || cat.includes('unisex');
+            const hasWomen = name.includes('women') || cat.includes('women');
+            return hasMen && !hasWomen;
+        }
+        
+        return true;
+    });
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-body-dark flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-body-accent animate-spin" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-body-dark flex items-center justify-center text-red-500">
+                Error loading products: {error}
+            </div>
+        );
+    }
 
     return (
         <div className="bg-body-dark min-h-screen py-12">
@@ -44,7 +78,7 @@ export default function GymWear() {
                     transition={{ staggerChildren: 0.1 }}
                     className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
                 >
-                    {products.map(product => (
+                    {filteredProducts.map(product => (
                         <motion.div
                             key={product.id}
                             initial={{ opacity: 0, y: 20 }}

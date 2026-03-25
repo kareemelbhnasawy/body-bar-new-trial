@@ -1,14 +1,41 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ProductCard } from '../components/ui/ProductCard';
-import { mockProducts } from '../data/mockData';
+import { useProducts } from '../hooks/useProducts';
+import { Loader2 } from 'lucide-react';
 
 export default function Equipment() {
     const [activeTab, setActiveTab] = useState<'Machines' | 'Home Equipment'>('Machines');
 
-    const products = mockProducts.filter(p =>
-        p.category === activeTab || (p.category !== 'Men' && p.category !== 'Women' && !p.id.startsWith('s')) // Simplified mock filter
-    );
+    const { products, loading, error } = useProducts('equipment');
+
+    const filteredProducts = products.filter(p => {
+        const name = p.name.toLowerCase();
+        const cat = p.category.toLowerCase();
+        
+        if (activeTab === 'Machines') {
+             return name.includes('machine') || cat.includes('machine') || name.includes('press') || name.includes('rack');
+        } else {
+             // Home Equipment
+             return !name.includes('machine') && !cat.includes('machine') && !name.includes('press') && !name.includes('rack');
+        }
+    });
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-body-dark flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-body-accent animate-spin" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-body-dark flex items-center justify-center text-red-500">
+                Error loading products: {error}
+            </div>
+        );
+    }
 
     return (
         <div className="bg-body-dark min-h-screen py-12">
@@ -41,7 +68,7 @@ export default function Equipment() {
                     transition={{ staggerChildren: 0.1 }}
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
                 >
-                    {products.map(product => (
+                    {filteredProducts.map(product => (
                         <motion.div
                             key={product.id}
                             initial={{ opacity: 0, y: 20 }}
@@ -50,7 +77,7 @@ export default function Equipment() {
                             <ProductCard product={product} />
                         </motion.div>
                     ))}
-                    {products.length === 0 && (
+                    {filteredProducts.length === 0 && (
                         <div className="col-span-full text-center text-body-muted">
                             Loading equipment... (Ensure mock data covers this category)
                         </div>

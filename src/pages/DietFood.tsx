@@ -1,39 +1,32 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, ArrowRight } from 'lucide-react';
+import { Check, ArrowRight, Loader2, Utensils } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
-
-const plans = [
-    {
-        id: 'slim',
-        name: 'The Slim Bar',
-        calories: '1200 - 1500 kcal',
-        type: 'Vegan or Balanced',
-        features: ['Free Nutrition Consultation', 'Weekend Pause', 'Fresh Daily Delivery', 'Allergy Customization'],
-        price: 'Daily from AED 100', // Example
-        color: 'border-body-accent/50'
-    },
-    {
-        id: 'kudra',
-        name: 'Al Kudra Bar',
-        calories: '2000 - 2200 kcal',
-        type: 'Balanced Diet',
-        features: ['Performance Focused', 'Free Consultation', 'Weekend Pause', 'High Protein'],
-        price: 'Daily from AED 130',
-        color: 'border-white/20'
-    },
-    {
-        id: 'repmax',
-        name: 'Rep Max Bar',
-        calories: '3000 - 3300 kcal',
-        type: 'Bulking / High Energy',
-        features: ['Maximum Calories', 'Free Consultation', 'Weekend Pause', 'Athlete Portions'],
-        price: 'Daily from AED 160',
-        color: 'border-body-accent'
-    }
-];
+import { useProducts } from '../hooks/useProducts';
+import { useCart } from '../context/CartContext';
 
 export default function DietFood() {
+    const { products, loading, error } = useProducts('diet-food');
+    const { addToCart } = useCart();
+    const navigate = useNavigate();
+
+    const handlePurchase = (product: any) => {
+        addToCart({
+            ...product,
+            quantity: 1
+        });
+        navigate('/checkout');
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-body-dark flex items-center justify-center">
+                <Loader2 className="w-12 h-12 text-body-accent animate-spin" />
+            </div>
+        );
+    }
+    
     return (
         <div className="bg-body-dark min-h-screen py-12">
             <div className="max-w-7xl mx-auto px-4">
@@ -48,40 +41,43 @@ export default function DietFood() {
                 </motion.div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {plans.map((plan, i) => (
-                        <motion.div
-                            key={plan.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.1 }}
-                            className={`bg-body-card rounded-2xl p-8 border-t-4 ${plan.color} relative overflow-hidden group`}
-                        >
-                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                {/* Abstract shape */}
-                                <div className="w-32 h-32 rounded-full bg-body-accent blur-2xl" />
-                            </div>
+                    {products.length === 0 ? (
+                        <div className="col-span-full py-12 text-center border border-white/5 rounded-2xl bg-white/5">
+                            <p className="text-gray-400">No diet plans available at the moment.</p>
+                        </div>
+                    ) : (
+                        products.map((plan, i) => (
+                            <motion.div
+                                key={plan.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.1 }}
+                                className={`bg-body-card rounded-2xl p-8 border-t-4 border-body-accent flex flex-col relative overflow-hidden group`}
+                            >
+                                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                    <div className="w-32 h-32 rounded-full bg-body-accent blur-2xl" />
+                                </div>
 
-                            <h3 className="text-2xl font-bold text-white mb-1">{plan.name}</h3>
-                            <div className="text-body-accent font-mono text-sm mb-4">{plan.calories}</div>
-                            <p className="text-body-muted text-sm mb-6 uppercase tracking-wider">{plan.type}</p>
+                                <div className="mb-6 h-40 rounded-xl overflow-hidden border border-white/5 relative bg-body-dark">
+                                    <img src={plan.image} alt={plan.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                                </div>
 
-                            <ul className="space-y-3 mb-8">
-                                {plan.features.map((feat, idx) => (
-                                    <li key={idx} className="flex items-start text-sm text-gray-300">
-                                        <Check size={16} className="text-body-accent mr-2 mt-0.5" />
-                                        {feat}
-                                    </li>
-                                ))}
-                            </ul>
+                                <h3 className="text-2xl font-bold text-white mb-2 line-clamp-2">{plan.name}</h3>
+                                <div className="text-body-accent font-mono text-xl font-bold mb-4">AED {plan.price.toFixed(2)}</div>
+                                
+                                <div className="text-gray-400 text-sm mb-6 line-clamp-3 overflow-hidden flex-1" dangerouslySetInnerHTML={{ __html: plan.description || 'Premium meal plan balanced for absolute performance.' }} />
 
-                            <div className="mt-auto">
-                                <p className="text-white font-semibold mb-4">{plan.price}</p>
-                                <Button className={`w-full ${plan.id !== 'kudra' ? 'bg-body-accent text-body-dark hover:bg-white' : 'bg-white text-body-dark hover:bg-body-accent'}`}>
-                                    View Plan <ArrowRight size={16} className="ml-2" />
-                                </Button>
-                            </div>
-                        </motion.div>
-                    ))}
+                                <div className="mt-auto pt-4">
+                                    <Button 
+                                        className="w-full bg-body-accent text-body-dark hover:bg-white flex justify-center items-center font-bold"
+                                        onClick={() => handlePurchase(plan)}
+                                    >
+                                        <Utensils size={18} className="mr-2" /> Purchase Plan
+                                    </Button>
+                                </div>
+                            </motion.div>
+                        ))
+                    )}
                 </div>
             </div>
         </div>

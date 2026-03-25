@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Dumbbell, Utensils, Zap, Shirt, Activity, Star, ChevronDown, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import MuxPlayer from '@mux/mux-player-react';
 import { Button } from '../components/ui/Button';
 
 // Animation variants
@@ -49,10 +50,15 @@ export default function Home() {
                     className="absolute inset-0 z-0"
                 >
                     <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-body-dark z-10" />
-                    <img
-                        src="/images/hero_background_1771074198081.png"
-                        alt="Gym Background"
-                        className="w-full h-full object-cover"
+                    {/* MUX PLAYER BACKGROUND */}
+                    <MuxPlayer
+                        playbackId="ScMC8FnqYsx45Ua8qxPUbOd3S2qgdj49UGHtFFGDZ02E"
+                        autoPlay="muted"
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover [&::part(video)]:object-cover"
+                        style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
                     />
                 </motion.div>
 
