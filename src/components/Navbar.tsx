@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { Menu, X, ShoppingBag, User } from 'lucide-react';
 import { clsx } from 'clsx';
+import { useCart } from '../context/CartContext';
 
 const navItems = [
     { name: 'Coaching', path: '/coaching' },
@@ -14,6 +15,8 @@ const navItems = [
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
+    const { setIsCartOpen, cartCount } = useCart();
+    const navigate = useNavigate();
 
     return (
         <nav className="fixed w-full z-50 bg-body-dark/80 backdrop-blur-md border-b border-body-secondary">
@@ -50,12 +53,16 @@ export default function Navbar() {
 
                     {/* Icons */}
                     <div className="hidden md:flex items-center space-x-4">
-                        <button className="text-gray-300 hover:text-white p-2">
+                        <button onClick={() => navigate('/profile')} className="text-gray-300 hover:text-white p-2">
                             <User size={20} />
                         </button>
-                        <button className="text-gray-300 hover:text-white p-2 relative">
+                        <button onClick={() => setIsCartOpen(true)} className="text-gray-300 hover:text-white p-2 relative">
                             <ShoppingBag size={20} />
-                            {/* Cart badge placement would go here */}
+                            {cartCount > 0 && (
+                                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-body-accent rounded-full">
+                                    {cartCount}
+                                </span>
+                            )}
                         </button>
                     </div>
 

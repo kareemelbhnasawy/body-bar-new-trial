@@ -34,12 +34,15 @@ export default function Coaching() {
     return (
         <div className="bg-body-dark min-h-screen py-12">
             <div className="max-w-7xl mx-auto px-4">
-                <div className="text-center mb-16">
-                    <h1 className="text-4xl font-bold text-white mb-4">Our Coaches</h1>
-                    <p className="text-body-muted max-w-2xl mx-auto">
+                <motion.div 
+                    initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+                    className="text-center mb-16"
+                >
+                    <h1 className="text-5xl font-black text-white mb-4 tracking-tight">Our Coaches</h1>
+                    <p className="text-body-accent font-medium max-w-2xl mx-auto">
                         Expert guidance to help you smash your goals. Choose your mentor.
                     </p>
-                </div>
+                </motion.div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {coaches.map((coach, i) => (
@@ -80,21 +83,28 @@ export default function Coaching() {
                 </div>
 
                 {/* Corporate / Group Info */}
-                <div className="mt-24 bg-body-card rounded-2xl p-8 md:p-12 border border-body-secondary">
-                    <div className="md:flex items-center justify-between gap-12">
+                <motion.div 
+                    initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
+                    className="mt-24 bg-body-card rounded-3xl p-8 md:p-12 border border-white/5 relative overflow-hidden group"
+                >
+                    <div className="absolute inset-0 bg-gradient-to-r from-body-accent/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    
+                    <div className="md:flex items-center justify-between gap-12 relative z-10">
                         <div className="flex-1 mb-8 md:mb-0">
-                            <h2 className="text-3xl font-bold text-white mb-4">Corporate Wellness</h2>
-                            <p className="text-body-muted mb-6">
+                            <h2 className="text-4xl font-black text-white mb-4">Corporate Wellness</h2>
+                            <p className="text-gray-400 mb-6 text-lg leading-relaxed">
                                 Boost your team's productivity and health with our customized corporate programs.
-                                We offer group sessions, health talks, and team building activities.
+                                We offer group sessions, health talks, and team building activities out of our premier facilities.
                             </p>
-                            <Button size="lg" variant="secondary">Inquire Now</Button>
+                            <Button size="xl" className="bg-body-accent text-body-dark hover:bg-white shadow-[0_0_20px_rgba(255,100,42,0.3)]">
+                                Inquire Now
+                            </Button>
                         </div>
-                        <div className="flex-1 bg-body-secondary h-64 rounded-xl flex items-center justify-center">
-                            <p className="text-body-muted">Corporate Event Image Placeholder</p>
+                        <div className="flex-1 bg-black/50 h-72 rounded-2xl flex items-center justify-center border border-white/10 overflow-hidden">
+                            <img src="https://placehold.co/600x400/171717/333333?text=Corporate+Wellness" alt="Corporate" className="w-full h-full object-cover opacity-60 mix-blend-luminosity group-hover:mix-blend-normal transition-all duration-700" />
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </div>
     );

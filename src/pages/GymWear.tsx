@@ -15,24 +15,27 @@ export default function GymWear() {
         <div className="bg-body-dark min-h-screen py-12">
             <div className="max-w-7xl mx-auto px-4">
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-12">
-                    <div>
-                        <h1 className="text-4xl font-bold text-white mb-2">Gym Wear</h1>
-                        <p className="text-body-muted">Performance apparel for every move.</p>
-                    </div>
-                    <div className="flex bg-body-card rounded-lg p-1 mt-4 md:mt-0 w-fit">
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
+                        <h1 className="text-5xl font-black text-white mb-2 tracking-tight">Gym Wear</h1>
+                        <p className="text-body-accent font-medium">Performance apparel for every move.</p>
+                    </motion.div>
+                    <motion.div 
+                        initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
+                        className="flex bg-body-card rounded-xl p-1 mt-6 md:mt-0 w-fit border border-white/5 shadow-xl"
+                    >
                         {(['All', 'Men', 'Women'] as const).map((gender) => (
                             <button
                                 key={gender}
                                 onClick={() => setFilter(gender)}
-                                className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${filter === gender
-                                    ? 'bg-body-accent text-body-dark shadow-lg'
-                                    : 'text-body-muted hover:text-white'
+                                className={`px-8 py-3 rounded-lg text-sm font-bold transition-all duration-300 ${filter === gender
+                                    ? 'bg-body-accent text-body-dark shadow-md'
+                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
                                 {gender}
                             </button>
                         ))}
-                    </div>
+                    </motion.div>
                 </div>
 
                 <motion.div

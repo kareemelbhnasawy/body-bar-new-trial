@@ -9,6 +9,9 @@ import GymWear from './pages/GymWear';
 import Equipment from './pages/Equipment';
 
 import Calculator from './pages/Calculator';
+import Checkout from './pages/Checkout';
+import Profile from './pages/Profile';
+import ProductDetail from './pages/ProductDetail';
 
 const NotFound = () => (
   <div className="p-8 text-center text-white">404 - Page Not Found</div>
@@ -26,6 +29,9 @@ function App() {
           <Route path="gym-wear" element={<GymWear />} />
           <Route path="equipment" element={<Equipment />} />
           <Route path="calculator" element={<Calculator />} />
+          <Route path="checkout" element={<Checkout />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="product/:id" element={<ProductDetail />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

@@ -13,24 +13,27 @@ export default function Equipment() {
     return (
         <div className="bg-body-dark min-h-screen py-12">
             <div className="max-w-7xl mx-auto px-4">
-                <div className="mb-12 text-center">
-                    <h1 className="text-4xl font-bold text-white mb-6">Equipment</h1>
+                <motion.div 
+                    initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+                    className="mb-12 text-center"
+                >
+                    <h1 className="text-5xl font-black text-white mb-6 tracking-tight">Equipment</h1>
 
-                    <div className="inline-flex bg-body-card rounded-full p-1 border border-body-secondary">
+                    <div className="inline-flex bg-body-card rounded-xl p-1 border border-white/5 shadow-xl">
                         {(['Machines', 'Home Equipment'] as const).map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-8 py-3 rounded-full text-sm font-bold transition-all ${activeTab === tab
-                                    ? 'bg-white text-body-dark'
-                                    : 'text-body-muted hover:text-white'
+                                className={`px-8 py-3 rounded-lg text-sm font-bold transition-all duration-300 ${activeTab === tab
+                                    ? 'bg-body-accent text-body-dark shadow-md'
+                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
                                 {tab}
                             </button>
                         ))}
                     </div>
-                </div>
+                </motion.div>
 
                 <motion.div
                     initial={{ opacity: 0 }}

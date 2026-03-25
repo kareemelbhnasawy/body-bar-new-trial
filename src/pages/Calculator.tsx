@@ -52,10 +52,13 @@ export default function Calculator() {
     return (
         <div className="bg-body-dark min-h-screen py-12 flex items-center justify-center">
             <div className="max-w-2xl w-full px-4">
-                <div className="text-center mb-10">
-                    <h1 className="text-4xl font-bold text-white mb-2">Smart Calorie Calculator</h1>
-                    <p className="text-body-muted">Scientifically calculate your daily nutrition needs.</p>
-                </div>
+                <motion.div 
+                    initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+                    className="text-center mb-10"
+                >
+                    <h1 className="text-5xl font-black text-white mb-2 tracking-tight">Smart Calorie Calculator</h1>
+                    <p className="text-body-accent font-medium">Scientifically calculate your daily nutrition needs.</p>
+                </motion.div>
 
                 <div className="bg-body-card border border-body-secondary rounded-2xl p-8 md:p-10 shadow-2xl">
                     <form onSubmit={calculate} className="space-y-6">
@@ -114,7 +117,7 @@ export default function Calculator() {
                             </div>
                         </div>
 
-                        <Button size="lg" className="w-full py-4 text-lg">Calculate Results</Button>
+                        <Button size="lg" className="w-full py-4 text-lg bg-body-accent text-body-dark hover:bg-white shadow-[0_0_20px_rgba(255,100,42,0.3)] transition-all">Calculate Results</Button>
                     </form>
 
                     {result && (
