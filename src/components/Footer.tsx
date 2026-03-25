@@ -9,9 +9,9 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     {/* Brand */}
                     <div className="space-y-4">
-                        <h3 className="text-2xl font-bold tracking-tighter text-white">
-                            BODY<span className="text-body-accent">BAR</span>
-                        </h3>
+                        <Link to="/" className="inline-block">
+                            <img src="/images/FinalLogobrown.png" alt="BodyBar" className="h-10 w-auto brightness-0 invert hover:opacity-80 transition-opacity" />
+                        </Link>
                         <p className="text-body-muted text-sm">
                             One stop shop for all your body needs. From meal plans to machines.
                         </p>

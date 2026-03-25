@@ -21,8 +21,8 @@ export default function Navbar() {
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
                     <div className="flex-shrink-0">
-                        <Link to="/" className="text-2xl font-bold tracking-tighter text-white">
-                            BODY<span className="text-body-accent">BAR</span>
+                        <Link to="/" className="flex items-center">
+                            <img src="/images/FinalLogobrown.png" alt="BodyBar" className="h-8 w-auto brightness-0 invert hover:opacity-80 transition-opacity" />
                         </Link>
                     </div>
 
