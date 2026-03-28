@@ -1,4 +1,11 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
 import Layout from './layouts/Layout';
 import Home from './pages/Home';
 import Supplements from './pages/Supplements';
@@ -13,6 +20,7 @@ import ProductDetail from './pages/ProductDetail';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import SearchPage from './pages/Search';
+import Admin from './pages/Admin';
 import { AuthProvider } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
 
@@ -25,7 +33,9 @@ function App() {
     <AuthProvider>
       <WishlistProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
+            <Route path="/admin" element={<Admin />} />
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
               <Route path="coaching" element={<Coaching />} />

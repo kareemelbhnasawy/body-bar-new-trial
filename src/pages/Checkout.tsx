@@ -96,6 +96,9 @@ export default function Checkout() {
 
             setOrderId(orderData.id);
 
+            // Fire confirmation email (non-blocking)
+            supabase.functions.invoke('send-order-email', { body: { orderId: orderData.id } }).catch(() => {})
+
             if (effectiveMethod === 'cod') {
                 clearCart();
                 setIsSuccess(true);

@@ -130,7 +130,7 @@ export default function Profile() {
     }
 
     return (
-        <div className="bg-body-dark min-h-dvh py-6 sm:py-10">
+        <div className="bg-body-dark min-h-dvh py-6 pb-24 sm:py-10 sm:pb-10">
             {/* Edit Profile Modal */}
             <AnimatePresence>
                 {isEditingProfile && (

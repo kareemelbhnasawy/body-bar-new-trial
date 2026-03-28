@@ -113,10 +113,13 @@ export default function Footer() {
                 {/* Bottom bar */}
                 <div className="border-t border-body-border mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-body-muted">
                     <p>&copy; {new Date().getFullYear()} BodyBar. All rights reserved.</p>
-                    <button className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer">
-                        <MessageCircle size={14} />
-                        <span>Need help? Chat with us</span>
-                    </button>
+                    <div className="flex items-center gap-4">
+                        <Link to="/admin" className="hover:text-white transition-colors">Admin Panel</Link>
+                        <button className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer">
+                            <MessageCircle size={14} />
+                            <span>Need help? Chat with us</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </footer>

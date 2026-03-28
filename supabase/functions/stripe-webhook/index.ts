@@ -36,6 +36,17 @@ serve(async (req) => {
         .eq('id', orderId)
 
       if (error) throw error
+
+      // Send confirmation email (best-effort)
+      const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
+      await fetch(`${supabaseUrl}/functions/v1/send-order-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+        },
+        body: JSON.stringify({ orderId }),
+      }).catch(() => {})
     }
 
     return new Response(JSON.stringify({ received: true }), { status: 200 })

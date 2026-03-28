@@ -154,6 +154,7 @@ export default function Home() {
     return (
         <div className="overflow-x-hidden bg-body-dark">
 
+
             {/* ── 1. HERO CAROUSEL ─────────────────────────────────── */}
             <section
                 className="relative overflow-hidden bg-body-card"

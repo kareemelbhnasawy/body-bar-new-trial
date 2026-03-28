@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Home, Utensils, ShoppingBag, Dumbbell, User } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -14,8 +15,8 @@ export default function MobileNav() {
     const { setIsCartOpen, cartCount } = useCart();
     const navigate = useNavigate();
 
-    return (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-body-dark/95 backdrop-blur-xl border-t border-body-border pb-safe">
+    return createPortal(
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-[9999] bg-body-dark border-t border-body-border pb-safe">
             <div className="flex items-center justify-around h-16">
                 {NAV_ITEMS.map(item => (
                     <NavLink
@@ -90,6 +91,7 @@ export default function MobileNav() {
                     )}
                 </NavLink>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
