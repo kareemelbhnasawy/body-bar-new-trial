@@ -119,7 +119,7 @@ export default function Profile() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-body-dark flex items-center justify-center">
+            <div className="min-h-dvh bg-body-dark flex items-center justify-center">
                 <Loader2 className="w-12 h-12 text-body-accent animate-spin" />
             </div>
         );
@@ -130,11 +130,11 @@ export default function Profile() {
     }
 
     return (
-        <div className="bg-body-dark min-h-screen py-12 pt-24">
+        <div className="bg-body-dark min-h-dvh py-6 sm:py-10">
             {/* Edit Profile Modal */}
             <AnimatePresence>
                 {isEditingProfile && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -174,52 +174,51 @@ export default function Profile() {
             </AnimatePresence>
 
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Header */}
-                <div className="bg-body-card border border-white/5 rounded-3xl p-8 mb-8 flex flex-col md:flex-row items-center gap-8 shadow-xl">
-                    <div className="w-24 h-24 rounded-full bg-body-accent/20 border border-body-accent flex items-center justify-center text-body-accent text-3xl font-black shadow-[0_0_20px_rgba(255,100,42,0.2)]">
+                {/* Header card */}
+                <div className="bg-body-card border border-body-border rounded-2xl p-5 sm:p-8 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                    <div className="size-16 sm:size-20 rounded-full bg-body-accent/20 border border-body-accent flex items-center justify-center text-body-accent text-2xl sm:text-3xl font-black shrink-0">
                         {user.user_metadata?.full_name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || 'U'}
                     </div>
-                    <div className="text-center md:text-left flex-1">
-                        <h1 className="text-3xl font-bold text-white tracking-tight">{user.user_metadata?.full_name || 'Athlete'}</h1>
-                        <p className="text-gray-400 font-medium">{user.email}</p>
+                    <div className="flex-1 min-w-0">
+                        <h1 className="font-display text-2xl sm:text-3xl font-black uppercase text-white tracking-tight">{user.user_metadata?.full_name || 'Athlete'}</h1>
+                        <p className="text-gray-400 text-sm truncate">{user.email}</p>
                     </div>
-                    <Button onClick={() => setIsEditingProfile(true)} variant="outline" className="border-white/20 text-white hover:bg-white/10">
-                        <Settings className="w-4 h-4 mr-2" /> Edit Profile
-                    </Button>
+                    <div className="flex items-center gap-2 shrink-0">
+                        <Button onClick={() => setIsEditingProfile(true)} variant="outline" className="border-body-border text-white hover:bg-white/10 text-sm">
+                            <Settings className="w-4 h-4 mr-1.5" /> Edit
+                        </Button>
+                        <Button onClick={signOut} variant="outline" className="border-red-800/50 text-red-400 hover:bg-red-500/10 text-sm">
+                            <LogOut className="w-4 h-4 mr-1.5" /> Sign Out
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Tab strip — horizontal scroll on mobile */}
+                <div className="flex gap-1 overflow-x-auto scrollbar-hide bg-body-card border border-body-border rounded-xl p-1 mb-6">
+                    {[
+                        { key: 'orders',   label: 'Orders',      Icon: ShoppingBag },
+                        { key: 'plans',    label: 'My Plans',    Icon: Star        },
+                        { key: 'wishlist', label: 'Saved',       Icon: Heart       },
+                    ].map(({ key, label, Icon }) => (
+                        <button
+                            key={key}
+                            onClick={() => setActiveTab(key)}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold whitespace-nowrap transition-colors cursor-pointer ${
+                                activeTab === key
+                                    ? 'bg-body-accent text-black'
+                                    : 'text-gray-400 hover:text-white'
+                            }`}
+                        >
+                            <Icon size={15} />
+                            {label}
+                        </button>
+                    ))}
                 </div>
 
                 {/* Content */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    {/* Sidebar Nav */}
-                    <div className="space-y-2">
-                        <button
-                            onClick={() => setActiveTab('orders')}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'orders' ? 'bg-body-accent text-body-dark shadow-md' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
-                        >
-                            <ShoppingBag className="w-5 h-5" /> Order History
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('plans')}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'plans' ? 'bg-body-accent text-body-dark shadow-md' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
-                        >
-                            <Star className="w-5 h-5" /> My Plans
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('wishlist')}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'wishlist' ? 'bg-body-accent text-body-dark shadow-md' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
-                        >
-                            <Heart className="w-5 h-5" /> Saved Items
-                        </button>
-                        <button
-                            onClick={signOut}
-                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-red-500 hover:bg-red-500/10 mt-8"
-                        >
-                            <LogOut className="w-5 h-5" /> Sign Out
-                        </button>
-                    </div>
-                    
+                <div className="grid grid-cols-1 gap-6">
                     {/* Main Content Area */}
-                    <div className="md:col-span-3">
+                    <div>
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={activeTab}

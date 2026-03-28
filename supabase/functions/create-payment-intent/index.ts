@@ -20,17 +20,16 @@ serve(async (req) => {
   try {
     const { orderId } = await req.json()
 
-    // Create a Supabase client with the Auth context of the user
-    const supabaseClient = createClient(
+    // Use service role to fetch the order — works for both guests (no auth token)
+    // and logged-in users without RLS blocking the lookup.
+    const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Get the user's order to verify the amount
-    const { data: order, error: orderError } = await supabaseClient
+    const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')
-      .select('*, order_items(*)')
+      .select('id, total_amount, user_id, guest_email, guest_name')
       .eq('id', orderId)
       .single()
 
@@ -38,33 +37,34 @@ serve(async (req) => {
       throw new Error('Order not found')
     }
 
-    // Create a PaymentIntent with the order amount and currency
+    // Build receipt_email: prefer guest_email, then look up auth user email
+    let receiptEmail: string | undefined
+    if (order.guest_email) {
+      receiptEmail = order.guest_email
+    } else if (order.user_id) {
+      const { data: userData } = await supabaseAdmin.auth.admin.getUserById(order.user_id)
+      receiptEmail = userData?.user?.email
+    }
+
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(order.total_amount * 100), // Convert AED to fils (cents)
+      amount: Math.round(order.total_amount * 100), // AED → fils
       currency: 'aed',
-      automatic_payment_methods: {
-        enabled: true,
-      },
+      automatic_payment_methods: { enabled: true },
+      receipt_email: receiptEmail,
       metadata: {
         orderId: order.id,
-        userId: order.user_id
+        userId:  order.user_id ?? 'guest',
       },
     })
 
     return new Response(
       JSON.stringify({ clientSecret: paymentIntent.client_secret }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )
   } catch (error) {
     return new Response(
       JSON.stringify({ error: error.message }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
     )
   }
 })

@@ -320,7 +320,100 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* ── 3. MEALS — Hero commerce section ─────────────────── */}
+            {/* ── 3. AMAZON-STYLE CATEGORY BROWSE ─────────────────── */}
+            <section className="py-8 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Box 1 — Meal Plans */}
+                    <Link to="/diet-food" className="group bg-body-card border border-body-border rounded-xl overflow-hidden hover:border-body-accent/40 transition-colors cursor-pointer">
+                        <div className="p-4 pb-0">
+                            <h3 className="font-bold text-white text-sm mb-3">Chef-Crafted Meal Plans</h3>
+                        </div>
+                        <div className="grid grid-cols-2 gap-px bg-body-border">
+                            {['Weight Loss', 'Muscle Gain', 'Keto', 'High Protein'].map(tag => (
+                                <div key={tag} className="bg-body-card p-2">
+                                    <img src="/images/category_diet_food_1771074226839.png" alt={tag}
+                                        className="w-full aspect-square object-cover rounded group-hover:scale-105 transition-transform duration-300" />
+                                    <p className="text-[10px] text-gray-400 mt-1 truncate">{tag}</p>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="px-4 py-3">
+                            <span className="text-body-accent text-xs font-semibold">See all plans →</span>
+                        </div>
+                    </Link>
+
+                    {/* Box 2 — Personal Training */}
+                    <Link to="/coaching" className="group bg-body-card border border-body-border rounded-xl overflow-hidden hover:border-body-accent/40 transition-colors cursor-pointer">
+                        <div className="p-4 pb-0">
+                            <h3 className="font-bold text-white text-sm mb-3">Train With the Best</h3>
+                        </div>
+                        <div className="grid grid-cols-2 gap-px bg-body-border">
+                            {[
+                                { label: 'Coach Bassem', img: '/coaches_images/bassem.webp' },
+                                { label: 'Alyona',       img: '/coaches_images/alyona.webp' },
+                                { label: 'Coach Ramzy',  img: '/coaches_images/ramzy.webp' },
+                                { label: 'Nikoleta',     img: '/coaches_images/nikoleta.webp' },
+                            ].map(c => (
+                                <div key={c.label} className="bg-body-card p-2">
+                                    <img src={c.img} alt={c.label}
+                                        className="w-full aspect-square object-cover object-top rounded group-hover:scale-105 transition-transform duration-300" />
+                                    <p className="text-[10px] text-gray-400 mt-1 truncate">{c.label}</p>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="px-4 py-3">
+                            <span className="text-body-accent text-xs font-semibold">Book a coach →</span>
+                        </div>
+                    </Link>
+
+                    {/* Box 3 — Supplements */}
+                    <Link to="/supplements" className="group bg-body-card border border-body-border rounded-xl overflow-hidden hover:border-body-accent/40 transition-colors cursor-pointer">
+                        <div className="p-4 pb-0">
+                            <h3 className="font-bold text-white text-sm mb-3">Top Supplements</h3>
+                        </div>
+                        <div className="grid grid-cols-2 gap-px bg-body-border">
+                            {['Protein', 'Creatine', 'Amino & Recovery', 'Vitamins'].map(tag => (
+                                <div key={tag} className="bg-body-card p-2">
+                                    <img src="/images/category_supplements_1771074241033.png" alt={tag}
+                                        className="w-full aspect-square object-cover rounded group-hover:scale-105 transition-transform duration-300" />
+                                    <p className="text-[10px] text-gray-400 mt-1 truncate">{tag}</p>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="px-4 py-3">
+                            <span className="text-body-accent text-xs font-semibold">Shop supplements →</span>
+                        </div>
+                    </Link>
+
+                    {/* Box 4 — Equipment & Sportswear */}
+                    <div className="flex flex-col gap-4">
+                        <Link to="/equipment" className="group bg-body-card border border-body-border rounded-xl overflow-hidden hover:border-body-accent/40 transition-colors cursor-pointer flex-1">
+                            <div className="relative h-32 overflow-hidden">
+                                <img src="/images/category_equipment_1771074286353.png" alt="Equipment"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                <div className="absolute inset-0 bg-linear-to-t from-body-dark/80 to-transparent" />
+                                <div className="absolute bottom-3 left-3">
+                                    <p className="text-white font-bold text-sm">Gym Equipment</p>
+                                    <span className="text-body-accent text-xs font-semibold">Shop now →</span>
+                                </div>
+                            </div>
+                        </Link>
+                        <Link to="/gym-wear" className="group bg-body-card border border-body-border rounded-xl overflow-hidden hover:border-body-accent/40 transition-colors cursor-pointer flex-1">
+                            <div className="relative h-32 overflow-hidden">
+                                <img src="/images/category_gym_wear_1771074258065.png" alt="Sportswear"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                <div className="absolute inset-0 bg-linear-to-t from-body-dark/80 to-transparent" />
+                                <div className="absolute bottom-3 left-3">
+                                    <p className="text-white font-bold text-sm">Sportswear</p>
+                                    <span className="text-body-accent text-xs font-semibold">Shop now →</span>
+                                </div>
+                            </div>
+                        </Link>
+                    </div>
+                </div>
+            </section>
+
+            {/* ── 5. MEALS — Hero commerce section ─────────────────── */}
             <section className="py-10 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
                     {/* Banner */}
