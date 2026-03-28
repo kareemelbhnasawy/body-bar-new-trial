@@ -2,108 +2,132 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ProductCard } from '../components/ui/ProductCard';
 import { useProducts } from '../hooks/useProducts';
-import { Button } from '../components/ui/Button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Zap, SlidersHorizontal } from 'lucide-react';
+import { CategoryBanner } from '../components/ui/CategoryBanner';
 
-const categories = ['All', 'Amino & Recovery', 'Creatine', 'Protein', 'Energy', 'Vitamins'];
+const CATEGORY_FILTERS = ['All', 'Protein', 'Creatine', 'Amino & Recovery', 'Energy & Pre-Workout', 'Vitamins'] as const;
+type CategoryFilter = typeof CATEGORY_FILTERS[number];
+type SortOption = 'default' | 'price-asc' | 'price-desc' | 'rating';
+
+const BADGE_CYCLE: { badge: string; badgeVariant: 'hot' | 'new' | 'popular' | 'value' }[] = [
+    { badge: 'Hot',     badgeVariant: 'hot'     },
+    { badge: 'Popular', badgeVariant: 'popular' },
+    { badge: 'New',     badgeVariant: 'new'     },
+    { badge: 'Value',   badgeVariant: 'value'   },
+];
 
 export default function Supplements() {
-    const [activeCategory, setActiveCategory] = useState('All');
-    
-    // Fetch live products from Supabase
+    const [activeCategory, setActiveCategory] = useState<CategoryFilter>('All');
+    const [sort, setSort] = useState<SortOption>('default');
+
     const { products, loading, error } = useProducts('supplements');
 
-    // Filter products on the client based on category
-    const filteredProducts = products.filter(p => {
+    const enriched = products.map((p, i) => ({ ...p, ...BADGE_CYCLE[i % BADGE_CYCLE.length] }));
+
+    const filtered = enriched.filter(p => {
         if (activeCategory === 'All') return true;
-        const name = p.name.toLowerCase();
-        const type = p.category.toLowerCase();
-        
-        switch(activeCategory) {
-            case 'Amino & Recovery':
-                return name.includes('amino') || name.includes('bcaa') || name.includes('glutamine') || type.includes('amino');
-            case 'Creatine':
-                return name.includes('creatine');
-            case 'Protein':
-                return name.includes('protein') || name.includes('mass gainer') || name.includes('whey') || type.includes('protein');
-            case 'Energy':
-                return name.includes('energy') || name.includes('pre') || name.includes('workout');
-            case 'Vitamins':
-                return name.includes('centrum') || name.includes('vitamin') || type.includes('vitamin');
-            default:
-                return true;
+        const n = p.name.toLowerCase();
+        const t = p.category.toLowerCase();
+        switch (activeCategory) {
+            case 'Protein':              return n.includes('protein') || n.includes('whey') || n.includes('mass gainer') || t.includes('protein');
+            case 'Creatine':             return n.includes('creatine');
+            case 'Amino & Recovery':     return n.includes('amino') || n.includes('bcaa') || n.includes('glutamine') || t.includes('amino');
+            case 'Energy & Pre-Workout': return n.includes('energy') || n.includes('pre') || n.includes('workout');
+            case 'Vitamins':             return n.includes('vitamin') || n.includes('centrum') || t.includes('vitamin');
+            default:                     return true;
         }
+    });
+
+    const sorted = [...filtered].sort((a, b) => {
+        if (sort === 'price-asc')  return a.price - b.price;
+        if (sort === 'price-desc') return b.price - a.price;
+        if (sort === 'rating')     return (b.rating ?? 0) - (a.rating ?? 0);
+        return 0;
     });
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-body-dark flex items-center justify-center">
-                <Loader2 className="w-8 h-8 text-body-accent animate-spin" />
+            <div className="min-h-dvh bg-body-dark flex items-center justify-center">
+                <Loader2 className="size-10 text-body-accent animate-spin" />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="min-h-screen bg-body-dark flex items-center justify-center text-red-500">
-                Error loading products: {error}
+            <div className="min-h-dvh bg-body-dark flex items-center justify-center text-red-400">
+                Failed to load products.
             </div>
         );
     }
 
     return (
-        <div className="bg-body-dark min-h-screen py-12">
-            <div className="max-w-7xl mx-auto px-4">
-                <motion.div 
-                    initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-                    className="mb-12 text-center"
-                >
-                    <h1 className="text-5xl font-black text-white mb-4 tracking-tight">Supplements</h1>
-                    <p className="text-body-accent font-medium max-w-2xl mx-auto">
-                        Premium supplements to support your training and recovery.
-                    </p>
-                </motion.div>
+        <div className="bg-body-dark min-h-dvh">
+            <CategoryBanner filterKey="supplements" />
 
-                {/* Filters */}
-                <motion.div 
-                    initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }}
-                    className="flex flex-wrap justify-center gap-2 mb-12 bg-body-card/50 p-2 rounded-2xl border border-white/5 w-fit mx-auto"
-                >
-                    {categories.map(cat => (
-                        <Button
-                            key={cat}
-                            variant={activeCategory === cat ? 'primary' : 'ghost'}
-                            onClick={() => setActiveCategory(cat)}
-                            className={`rounded-xl transition-all duration-300 ${activeCategory === cat ? 'bg-body-accent text-body-dark shadow-md' : 'text-gray-400 hover:text-white'}`}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Filter + sort bar */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+                    {/* Category pills */}
+                    <div className="flex flex-wrap gap-2">
+                        {CATEGORY_FILTERS.map(f => (
+                            <button
+                                key={f}
+                                onClick={() => setActiveCategory(f)}
+                                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+                                    activeCategory === f
+                                        ? 'bg-body-accent text-black'
+                                        : 'bg-body-card border border-body-border text-gray-400 hover:text-white hover:border-body-accent/40'
+                                }`}
+                            >
+                                {f}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Sort */}
+                    <div className="flex items-center gap-2 shrink-0">
+                        <SlidersHorizontal size={14} className="text-body-muted" />
+                        <select
+                            value={sort}
+                            onChange={e => setSort(e.target.value as SortOption)}
+                            className="bg-body-card border border-body-border text-sm text-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-body-accent cursor-pointer"
                         >
-                            {cat}
-                        </Button>
-                    ))}
-                </motion.div>
+                            <option value="default">Sort: Default</option>
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                            <option value="rating">Top Rated</option>
+                        </select>
+                    </div>
+                </div>
 
                 {/* Grid */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ staggerChildren: 0.1 }}
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-                >
-                    {filteredProducts.length > 0 ? (
-                        filteredProducts.map(product => (
+                {sorted.length === 0 ? (
+                    <div className="py-20 text-center border border-body-border rounded-xl bg-body-card">
+                        <Zap size={40} className="mx-auto text-body-muted mb-4" />
+                        <p className="text-gray-400">No products in this category.</p>
+                        <button onClick={() => setActiveCategory('All')} className="text-body-accent text-sm mt-2 hover:underline cursor-pointer">
+                            Show all
+                        </button>
+                    </div>
+                ) : (
+                    <motion.div
+                        layout
+                        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+                    >
+                        {sorted.map((product, i) => (
                             <motion.div
                                 key={product.id}
-                                initial={{ opacity: 0, y: 20 }}
+                                layout
+                                initial={{ opacity: 0, y: 12 }}
                                 animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.04 }}
                             >
                                 <ProductCard product={product} />
                             </motion.div>
-                        ))
-                    ) : (
-                        <div className="col-span-full text-center text-body-muted py-12">
-                            No products found in this category.
-                        </div>
-                    )}
-                </motion.div>
+                        ))}
+                    </motion.div>
+                )}
             </div>
         </div>
     );

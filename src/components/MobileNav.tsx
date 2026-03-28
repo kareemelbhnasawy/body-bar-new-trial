@@ -1,28 +1,30 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, Grid, ShoppingBag, User } from 'lucide-react';
+import { Home, Utensils, ShoppingBag, Dumbbell, User } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { motion } from 'framer-motion';
+
+const NAV_ITEMS = [
+    { label: 'Home',     path: '/',         icon: Home,      end: true  },
+    { label: 'Meals',    path: '/diet-food', icon: Utensils,  end: false },
+    { label: 'Training', path: '/coaching',  icon: Dumbbell,  end: false },
+] as const;
 
 export default function MobileNav() {
     const { setIsCartOpen, cartCount } = useCart();
     const navigate = useNavigate();
 
-    const navItems = [
-        { name: 'Home', path: '/', icon: Home },
-        { name: 'Shop', path: '/supplements', icon: Grid },
-    ];
-
     return (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-body-dark/90 backdrop-blur-xl border-t border-white/10 pb-safe">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-body-dark/95 backdrop-blur-xl border-t border-body-border pb-safe">
             <div className="flex items-center justify-around h-16">
-                {navItems.map((item) => (
+                {NAV_ITEMS.map(item => (
                     <NavLink
-                        key={item.name}
+                        key={item.path}
                         to={item.path}
+                        end={item.end}
                         className={({ isActive }) =>
-                            `flex flex-col items-center justify-center w-full h-full space-y-1 relative ${
-                                isActive ? 'text-body-accent' : 'text-gray-400 hover:text-white'
+                            `flex flex-col items-center justify-center w-full h-full gap-1 relative transition-colors ${
+                                isActive ? 'text-body-accent' : 'text-gray-400'
                             }`
                         }
                     >
@@ -30,42 +32,46 @@ export default function MobileNav() {
                             <>
                                 {isActive && (
                                     <motion.div
-                                        layoutId="mobile-nav-indicator"
-                                        className="absolute top-0 w-8 h-1 bg-body-accent rounded-b-full shadow-[0_0_10px_rgba(255,100,42,0.5)]"
-                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                        layoutId="mobile-tab-indicator"
+                                        className="absolute top-0 w-10 h-0.5 bg-body-accent rounded-b-full"
+                                        transition={{ type: 'spring', stiffness: 400, damping: 35 }}
                                     />
                                 )}
-                                <item.icon size={22} className={isActive ? 'mt-1' : ''} />
-                                <span className="text-[10px] font-medium">{item.name}</span>
+                                <item.icon size={20} />
+                                <span className="text-[10px] font-semibold">{item.label}</span>
                             </>
                         )}
                     </NavLink>
                 ))}
 
+                {/* Cart */}
                 <button
                     onClick={() => setIsCartOpen(true)}
-                    className="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-white relative"
+                    aria-label={`Cart (${cartCount} items)`}
+                    className="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-white transition-colors cursor-pointer"
                 >
                     <div className="relative">
-                        <ShoppingBag size={22} />
+                        <ShoppingBag size={20} />
                         {cartCount > 0 && (
                             <motion.span
-                                initial={{ scale: 0 }}
+                                key={cartCount}
+                                initial={{ scale: 0.6 }}
                                 animate={{ scale: 1 }}
-                                className="absolute -top-1.5 -right-2 inline-flex items-center justify-center min-w-[18px] h-[18px] text-[10px] font-bold text-white bg-body-accent rounded-full border border-body-dark"
+                                className="absolute -top-1.5 -right-2 min-w-4 h-4 bg-body-accent text-black text-[9px] font-bold rounded-full flex items-center justify-center px-0.5 tabular-nums"
                             >
                                 {cartCount}
                             </motion.span>
                         )}
                     </div>
-                    <span className="text-[10px] font-medium">Cart</span>
+                    <span className="text-[10px] font-semibold">Cart</span>
                 </button>
 
+                {/* Profile */}
                 <NavLink
                     to="/profile"
                     className={({ isActive }) =>
-                        `flex flex-col items-center justify-center w-full h-full space-y-1 relative ${
-                            isActive ? 'text-body-accent' : 'text-gray-400 hover:text-white'
+                        `flex flex-col items-center justify-center w-full h-full gap-1 relative transition-colors ${
+                            isActive ? 'text-body-accent' : 'text-gray-400'
                         }`
                     }
                 >
@@ -73,13 +79,13 @@ export default function MobileNav() {
                         <>
                             {isActive && (
                                 <motion.div
-                                    layoutId="mobile-nav-indicator"
-                                    className="absolute top-0 w-8 h-1 bg-body-accent rounded-b-full shadow-[0_0_10px_rgba(255,100,42,0.5)]"
-                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                    layoutId="mobile-tab-indicator"
+                                    className="absolute top-0 w-10 h-0.5 bg-body-accent rounded-b-full"
+                                    transition={{ type: 'spring', stiffness: 400, damping: 35 }}
                                 />
                             )}
-                            <User size={22} className={isActive ? 'mt-1' : ''} />
-                            <span className="text-[10px] font-medium">Profile</span>
+                            <User size={20} />
+                            <span className="text-[10px] font-semibold">Profile</span>
                         </>
                     )}
                 </NavLink>

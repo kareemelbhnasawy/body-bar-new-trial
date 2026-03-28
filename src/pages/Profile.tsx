@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Star, Clock, Settings, LogOut, CheckCircle, Loader2, ChevronDown, ChevronUp, Package, X, Save } from 'lucide-react';
+import { ShoppingBag, Star, Clock, Settings, LogOut, CheckCircle, Loader2, ChevronDown, ChevronUp, Package, X, Save, Heart, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../context/AuthContext';
+import { useWishlist } from '../context/WishlistContext';
 import { supabase } from '../lib/supabase';
 import { Navigate, Link, useNavigate } from 'react-router-dom';
 
 export default function Profile() {
     const { user, isLoading, signOut } = useAuth();
+    const { items: wishlistItems, toggle: toggleWishlist } = useWishlist();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('orders');
     const [orders, setOrders] = useState<any[]>([]);
@@ -202,7 +204,13 @@ export default function Profile() {
                         >
                             <Star className="w-5 h-5" /> My Plans
                         </button>
-                        <button 
+                        <button
+                            onClick={() => setActiveTab('wishlist')}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'wishlist' ? 'bg-body-accent text-body-dark shadow-md' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                        >
+                            <Heart className="w-5 h-5" /> Saved Items
+                        </button>
+                        <button
                             onClick={signOut}
                             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-red-500 hover:bg-red-500/10 mt-8"
                         >
@@ -326,6 +334,47 @@ export default function Profile() {
                                                         <span className="inline-block px-3 py-1 bg-green-500/20 text-green-400 text-xs font-black uppercase tracking-wider rounded-md relative z-10">
                                                             Active Subscription
                                                         </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {activeTab === 'wishlist' && (
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-white mb-6 tracking-tight">Saved Items</h2>
+                                        {wishlistItems.length === 0 ? (
+                                            <div className="text-center py-12">
+                                                <Heart className="w-16 h-16 text-body-accent mx-auto mb-4 opacity-50" />
+                                                <h2 className="text-2xl font-bold text-white mb-2">No Saved Items</h2>
+                                                <p className="text-gray-400 mb-6 font-medium">Tap the heart icon on any product to save it here.</p>
+                                                <Button onClick={() => navigate('/supplements')} className="bg-body-accent text-body-dark font-bold hover:bg-white transition-colors">Shop Now</Button>
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                {wishlistItems.map(item => (
+                                                    <div key={item.product_id} className="flex items-center gap-4 bg-black/20 border border-white/10 rounded-2xl p-4 hover:border-body-accent/30 transition-colors group">
+                                                        <Link to={`/product/${item.product_id}`} className="shrink-0">
+                                                            <img
+                                                                src={item.product_image || '/images/FinalLogobrown.png'}
+                                                                alt={item.product_name}
+                                                                className="size-16 rounded-xl object-cover bg-body-dark"
+                                                            />
+                                                        </Link>
+                                                        <div className="flex-1 min-w-0">
+                                                            <Link to={`/product/${item.product_id}`}>
+                                                                <p className="text-white font-semibold text-sm line-clamp-2 hover:text-body-accent transition-colors text-pretty">{item.product_name}</p>
+                                                            </Link>
+                                                            <p className="text-body-accent font-bold text-sm mt-1 tabular-nums">AED {item.product_price.toFixed(0)}</p>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => toggleWishlist({ product_id: item.product_id, product_name: item.product_name, product_price: item.product_price, product_image: item.product_image })}
+                                                            aria-label="Remove from wishlist"
+                                                            className="shrink-0 p-2 text-gray-500 hover:text-red-400 transition-colors cursor-pointer"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
                                                     </div>
                                                 ))}
                                             </div>

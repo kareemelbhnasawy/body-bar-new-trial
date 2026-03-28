@@ -1,14 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-  --color-body-dark: #1A0D06;
-  --color-body-card: #2B170A;
-  --color-body-accent: #FF642A;
-  --color-body-secondary: #45210A;
-  --color-body-text: #FDFBF9;
-  --color-body-muted: #A88E7E;
+  /* ── Core Brand Colors ─────────────────────────────── */
+  --color-body-dark:      #0E0906;
+  --color-body-card:      #1A100A;
+  --color-body-accent:    #F55A1A;
+  --color-body-secondary: #291910;
+  --color-body-text:      #F5F0EB;
+  --color-body-muted:     #8A7468;
+  --color-body-border:    #261810;
 
-  --font-sans: 'Inter', sans-serif;
+  /* ── Ecommerce Badge Colors ────────────────────────── */
+  --color-badge-hot:      #DC2626;
+  --color-badge-new:      #16A34A;
+  --color-badge-popular:  #D97706;
+  --color-badge-value:    #7C3AED;
+
+  /* ── Typography ────────────────────────────────────── */
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-sans:    'Inter', sans-serif;
 }
 
 @layer base {
@@ -18,5 +28,19 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Hide scrollbar for carousel tracks */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Safe area bottom padding for mobile nav */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }

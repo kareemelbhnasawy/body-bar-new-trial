@@ -6,11 +6,16 @@ import CartDrawer from '../components/CartDrawer';
 import MobileNav from '../components/MobileNav';
 import { NewsletterModal } from '../components/ui/NewsletterModal';
 
+/**
+ * Navbar height breakdown:
+ *  - Mobile:  announcement (hidden) + row1 (64px) = 64px  → pt-16
+ *  - Desktop: announcement (28px)   + row1 (64px) + row2 (44px) = 136px → pt-[136px]
+ */
 export default function Layout() {
     return (
-        <div className="min-h-screen bg-body-dark flex flex-col font-sans relative md:pb-0 pb-16">
+        <div className="min-h-dvh bg-body-dark flex flex-col font-sans relative pb-16 md:pb-0">
             <Navbar />
-            <main className="flex-grow pt-16">
+            <main className="grow pt-16 sm:pt-34">
                 <Outlet />
             </main>
             <Footer />
