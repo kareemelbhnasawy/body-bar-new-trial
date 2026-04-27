@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -95,10 +95,22 @@ const MOCK_MEAL_PLANS: Product[] = [
 
 // ─── Featured coaches for homepage preview ───────────────────────────────────
 const FEATURED_COACHES = [
-    { name: 'Coach Bassem', title: 'Head Trainer & Founder', image: '/coaches_images/bassem.webp',   specialty: 'Hypertrophy & Strength' },
-    { name: 'Alyona',       title: 'Certified Trainer',       image: '/coaches_images/alyona.webp',   specialty: 'General Fitness & Mobility' },
-    { name: 'Coach Ramzy',  title: 'CrossFit & Performance',  image: '/coaches_images/ramzy.webp',    specialty: 'CrossFit & Athletic Performance' },
-    { name: 'Nikoleta',     title: 'Transformation Coach',    image: '/coaches_images/nikoleta.webp', specialty: 'Weight Loss & Body Sculpting' },
+    { name: 'Coach Bassem', title: 'Head Trainer & Founder', image: '/coaches_images/bassem.webp',   specialty: 'Hypertrophy & Strength', years: '10+ yrs' },
+    { name: 'Alyona',       title: 'Certified Trainer',       image: '/coaches_images/alyona.webp',   specialty: 'General Fitness & Mobility', years: '9 yrs' },
+    { name: 'Coach Ramzy',  title: 'CrossFit & Performance',  image: '/coaches_images/ramzy.webp',    specialty: 'CrossFit & Athletic Performance', years: '10 yrs' },
+    { name: 'Nikoleta',     title: 'Transformation Coach',    image: '/coaches_images/nikoleta.webp', specialty: 'Weight Loss & Body Sculpting', years: '7 yrs' },
+    { name: 'Ingy Sweid',   title: 'General Fitness',         image: '/coaches_images/ingy_sweid.webp', specialty: 'Strength, Cardio & Yoga', years: '8 yrs' },
+    { name: 'Khaled',       title: 'Coach',                   image: '/coaches_images/khaled.webp',    specialty: 'Functional Training', years: '12 yrs' },
+    { name: 'Elena',        title: 'Holistic Coach',          image: '/coaches_images/elena.webp',     specialty: 'Tai Chi, Qi Gong & Breathwork', years: '5 yrs' },
+    { name: 'Diana',        title: 'Personal Trainer',        image: '/coaches_images/diana.webp',     specialty: 'CrossFit & Body Sculpting', years: '7 yrs' },
+];
+
+// ─── Meal plan goal mapping with colors ──────────────────────────────────────
+const MEAL_PLAN_GOALS = [
+    { tag: 'Weight Loss',   color: '#3B82F6', icon: '🔥' },
+    { tag: 'Muscle Gain',   color: '#22C55E', icon: '💪' },
+    { tag: 'Keto',          color: '#A855F7', icon: '🥑' },
+    { tag: 'High Protein',  color: '#F59E0B', icon: '🥩' },
 ];
 
 // ─── Section header component ────────────────────────────────────────────────
@@ -119,6 +131,139 @@ function SectionHeader({ title, subtitle, linkTo, linkLabel = 'View All' }: {
             >
                 {linkLabel} <ChevronRight size={15} />
             </Link>
+        </div>
+    );
+}
+
+// ─── Coach Carousel Component ────────────────────────────────────────────────
+interface Coach {
+    name: string;
+    title: string;
+    image: string;
+    specialty: string;
+    years: string;
+}
+
+function CoachCarousel({ coaches }: { coaches: Coach[] }) {
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(true);
+
+    const checkScroll = () => {
+        if (!scrollRef.current) return;
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        setCanScrollLeft(scrollLeft > 0);
+        setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    };
+
+    useEffect(() => {
+        checkScroll();
+        const el = scrollRef.current;
+        if (el) el.addEventListener('scroll', checkScroll);
+        return () => el?.removeEventListener('scroll', checkScroll);
+    }, []);
+
+    const scroll = (direction: 'left' | 'right') => {
+        if (!scrollRef.current) return;
+        const cardWidth = 280; // approximate card width + gap
+        scrollRef.current.scrollBy({ 
+            left: direction === 'left' ? -cardWidth * 2 : cardWidth * 2, 
+            behavior: 'smooth' 
+        });
+    };
+
+    return (
+        <div className="relative group/carousel">
+            {/* Navigation Arrows */}
+            {canScrollLeft && (
+                <button
+                    onClick={() => scroll('left')}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 size-12 rounded-full bg-black/80 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-body-accent hover:text-black hover:border-body-accent transition-all cursor-pointer shadow-xl opacity-0 group-hover/carousel:opacity-100 -translate-x-2 group-hover/carousel:translate-x-0"
+                    aria-label="Scroll left"
+                >
+                    <ChevronLeft size={24} />
+                </button>
+            )}
+            {canScrollRight && (
+                <button
+                    onClick={() => scroll('right')}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 size-12 rounded-full bg-black/80 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-body-accent hover:text-black hover:border-body-accent transition-all cursor-pointer shadow-xl opacity-0 group-hover/carousel:opacity-100 translate-x-2 group-hover/carousel:translate-x-0"
+                    aria-label="Scroll right"
+                >
+                    <ChevronRight size={24} />
+                </button>
+            )}
+
+            {/* Coach Cards */}
+            <div 
+                ref={scrollRef}
+                className="flex gap-5 overflow-x-auto scrollbar-hide pb-4 scroll-smooth snap-x snap-mandatory"
+            >
+                {coaches.map((coach, idx) => (
+                    <Link
+                        key={coach.name}
+                        to="/coaching"
+                        className="shrink-0 w-64 sm:w-72 bg-body-dark border border-body-border rounded-2xl overflow-hidden group cursor-pointer hover:border-body-accent/50 transition-all duration-300 snap-start hover:shadow-xl hover:shadow-body-accent/10 hover:-translate-y-1"
+                    >
+                        {/* Coach Image */}
+                        <div className="relative h-72 overflow-hidden bg-body-secondary">
+                            <img
+                                src={coach.image}
+                                alt={coach.name}
+                                loading="lazy"
+                                className="w-full h-full object-cover object-top group-hover:scale-110 transition-transform duration-700"
+                            />
+                            {/* Gradient overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80" />
+                            
+                            {/* Years badge */}
+                            <span className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/10">
+                                {coach.years}
+                            </span>
+                            
+                            {/* Featured badge for first coach */}
+                            {idx === 0 && (
+                                <span className="absolute top-3 left-3 bg-body-accent text-black text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full">
+                                    Head Trainer
+                                </span>
+                            )}
+                            
+                            {/* Name overlay on image */}
+                            <div className="absolute bottom-0 inset-x-0 p-4">
+                                <p className="text-body-accent text-[11px] font-bold uppercase tracking-wider">{coach.title}</p>
+                                <h3 className="text-white font-bold text-xl mt-0.5">{coach.name}</h3>
+                            </div>
+                        </div>
+                        
+                        {/* Coach Info */}
+                        <div className="p-4 bg-body-dark">
+                            <p className="text-gray-400 text-sm line-clamp-2">{coach.specialty}</p>
+                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-body-border">
+                                <div className="flex items-center gap-1">
+                                    {[1,2,3,4,5].map(i => (
+                                        <Star key={i} size={12} className="text-amber-400 fill-amber-400" />
+                                    ))}
+                                    <span className="text-gray-500 text-xs ml-1">5.0</span>
+                                </div>
+                                <span className="text-body-accent text-xs font-semibold flex items-center gap-1">
+                                    Book <ArrowRight size={12} />
+                                </span>
+                            </div>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+
+            {/* Scroll indicator dots */}
+            <div className="flex justify-center gap-1.5 mt-4">
+                {Array.from({ length: Math.ceil(coaches.length / 3) }).map((_, i) => (
+                    <div
+                        key={i}
+                        className="h-1.5 rounded-full bg-body-border transition-all"
+                        style={{ width: i === 0 ? '24px' : '8px', background: i === 0 ? '#F55A1A' : undefined }}
+                    />
+                ))}
+            </div>
         </div>
     );
 }
@@ -324,62 +469,73 @@ export default function Home() {
             {/* ── 3. AMAZON-STYLE CATEGORY BROWSE ─────────────────── */}
             <section className="py-8 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Box 1 — Meal Plans */}
+                    {/* Box 1 — Meal Plans (uses actual product images) */}
                     <Link to="/diet-food" className="group bg-body-card border border-body-border rounded-xl overflow-hidden hover:border-body-accent/40 transition-colors cursor-pointer">
                         <div className="p-4 pb-0">
                             <h3 className="font-bold text-white text-sm mb-3">Chef-Crafted Meal Plans</h3>
                         </div>
                         <div className="grid grid-cols-2 gap-px bg-body-border">
-                            {['Weight Loss', 'Muscle Gain', 'Keto', 'High Protein'].map(tag => (
-                                <div key={tag} className="bg-body-card p-2">
-                                    <img src="/images/category_diet_food_1771074226839.png" alt={tag}
-                                        className="w-full aspect-square object-cover rounded group-hover:scale-105 transition-transform duration-300" />
-                                    <p className="text-[10px] text-gray-400 mt-1 truncate">{tag}</p>
-                                </div>
-                            ))}
+                            {MEAL_PLAN_GOALS.map((goal, idx) => {
+                                // Use actual product images if available, falling back to category image
+                                const productImage = mealsToShow[idx]?.image || '/images/category_diet_food_1771074226839.png';
+                                return (
+                                    <div key={goal.tag} className="bg-body-card p-2 relative">
+                                        <div className="relative aspect-square rounded overflow-hidden">
+                                            <img src={productImage} alt={goal.tag}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                                            <span className="absolute bottom-1 right-1 text-lg">{goal.icon}</span>
+                                        </div>
+                                        <p className="text-[10px] text-gray-400 mt-1 truncate">{goal.tag}</p>
+                                    </div>
+                                );
+                            })}
                         </div>
                         <div className="px-4 py-3">
                             <span className="text-body-accent text-xs font-semibold">See all plans →</span>
                         </div>
                     </Link>
 
-                    {/* Box 2 — Personal Training */}
+                    {/* Box 2 — Personal Training (single hero card, carousel is below) */}
                     <Link to="/coaching" className="group bg-body-card border border-body-border rounded-xl overflow-hidden hover:border-body-accent/40 transition-colors cursor-pointer">
-                        <div className="p-4 pb-0">
-                            <h3 className="font-bold text-white text-sm mb-3">Train With the Best</h3>
-                        </div>
-                        <div className="grid grid-cols-2 gap-px bg-body-border">
-                            {[
-                                { label: 'Coach Bassem', img: '/coaches_images/bassem.webp' },
-                                { label: 'Alyona',       img: '/coaches_images/alyona.webp' },
-                                { label: 'Coach Ramzy',  img: '/coaches_images/ramzy.webp' },
-                                { label: 'Nikoleta',     img: '/coaches_images/nikoleta.webp' },
-                            ].map(c => (
-                                <div key={c.label} className="bg-body-card p-2">
-                                    <img src={c.img} alt={c.label}
-                                        className="w-full aspect-square object-cover object-top rounded group-hover:scale-105 transition-transform duration-300" />
-                                    <p className="text-[10px] text-gray-400 mt-1 truncate">{c.label}</p>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="px-4 py-3">
-                            <span className="text-body-accent text-xs font-semibold">Book a coach →</span>
+                        <div className="relative h-full min-h-[280px] overflow-hidden">
+                            <img 
+                                src="/coaches_images/bassem.webp" 
+                                alt="Personal Training"
+                                className="absolute inset-0 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" 
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+                            <div className="absolute inset-0 flex flex-col justify-end p-4">
+                                <span className="inline-block bg-body-accent text-black text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded w-fit mb-2">
+                                    8+ Certified Coaches
+                                </span>
+                                <h3 className="font-bold text-white text-lg mb-1">Train With the Best</h3>
+                                <p className="text-gray-300 text-xs mb-3 line-clamp-2">
+                                    Personal training packages from AED 1,499. Real transformations, proven results.
+                                </p>
+                                <span className="text-body-accent text-xs font-semibold flex items-center gap-1">
+                                    Meet our coaches <ChevronRight size={12} />
+                                </span>
+                            </div>
                         </div>
                     </Link>
 
-                    {/* Box 3 — Supplements */}
+                    {/* Box 3 — Supplements (uses actual product images) */}
                     <Link to="/supplements" className="group bg-body-card border border-body-border rounded-xl overflow-hidden hover:border-body-accent/40 transition-colors cursor-pointer">
                         <div className="p-4 pb-0">
                             <h3 className="font-bold text-white text-sm mb-3">Top Supplements</h3>
                         </div>
                         <div className="grid grid-cols-2 gap-px bg-body-border">
-                            {['Protein', 'Creatine', 'Amino & Recovery', 'Vitamins'].map(tag => (
-                                <div key={tag} className="bg-body-card p-2">
-                                    <img src="/images/category_supplements_1771074241033.png" alt={tag}
-                                        className="w-full aspect-square object-cover rounded group-hover:scale-105 transition-transform duration-300" />
-                                    <p className="text-[10px] text-gray-400 mt-1 truncate">{tag}</p>
-                                </div>
-                            ))}
+                            {['Protein', 'Creatine', 'Amino & Recovery', 'Vitamins'].map((tag, idx) => {
+                                const productImage = supplements[idx]?.image || '/images/category_supplements_1771074241033.png';
+                                return (
+                                    <div key={tag} className="bg-body-card p-2">
+                                        <img src={productImage} alt={tag}
+                                            className="w-full aspect-square object-cover rounded group-hover:scale-105 transition-transform duration-300" />
+                                        <p className="text-[10px] text-gray-400 mt-1 truncate">{tag}</p>
+                                    </div>
+                                );
+                            })}
                         </div>
                         <div className="px-4 py-3">
                             <span className="text-body-accent text-xs font-semibold">Shop supplements →</span>
@@ -473,7 +629,7 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* ── 4. PERSONAL TRAINING ─────────────────────────────── */}
+            {/* ── 4. PERSONAL TRAINING — Premium Coach Carousel ───── */}
             <section className="py-10 px-4 sm:px-6 lg:px-8 bg-body-card border-y border-body-border">
                 <div className="max-w-7xl mx-auto">
                     <SectionHeader
@@ -483,36 +639,11 @@ export default function Home() {
                         linkLabel="See All Coaches"
                     />
 
-                    {/* Coach cards */}
-                    <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 mb-8">
-                        {FEATURED_COACHES.map(coach => (
-                            <Link
-                                key={coach.name}
-                                to="/coaching"
-                                className="shrink-0 w-50 bg-body-dark border border-body-border rounded-xl overflow-hidden group cursor-pointer hover:border-body-accent/40 transition-colors"
-                            >
-                                <div className="aspect-3/4 overflow-hidden bg-body-secondary relative">
-                                    <img
-                                        src={coach.image}
-                                        alt={coach.name}
-                                        className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black/80 to-transparent" />
-                                </div>
-                                <div className="p-3">
-                                    <p className="text-[10px] text-body-accent uppercase tracking-widest font-bold">{coach.title}</p>
-                                    <h3 className="text-white font-bold text-sm mt-0.5">{coach.name}</h3>
-                                    <p className="text-body-muted text-xs mt-1 line-clamp-2">{coach.specialty}</p>
-                                    <div className="flex items-center gap-0.5 mt-2">
-                                        {[1,2,3,4,5].map(i => <Star key={i} size={10} className="text-amber-400 fill-amber-400" />)}
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
+                    {/* Coach Carousel with Navigation */}
+                    <CoachCarousel coaches={FEATURED_COACHES} />
 
                     {/* Package comparison */}
-                    <div className="grid sm:grid-cols-3 gap-4">
+                    <div className="grid sm:grid-cols-3 gap-4 mt-8">
                         {[
                             { title: 'Starter Pack',   duration: '1 Month',  sessions: '8 sessions',   price: 1499, desc: 'Perfect for beginners. Assess, plan, and start your transformation.' },
                             { title: 'Transform Pack', duration: '3 Months', sessions: '24 sessions',  price: 3999, desc: 'Our most popular package. Enough time to see real, lasting results.', featured: true },

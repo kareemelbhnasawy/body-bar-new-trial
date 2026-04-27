@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, ArrowLeft, Truck, CreditCard, ShoppingBag, User } from 'lucide-react';
+import { CheckCircle, ArrowLeft, Truck, CreditCard, ShoppingBag, User, Tag, X, Loader2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -11,10 +11,25 @@ import CheckoutForm from '../components/CheckoutForm';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
-const DIGITAL_CATEGORIES = ['training programs', 'coaching', 'healthy meals', 'diet-food'];
-function isDigitalProduct(cat: string | undefined) {
-    if (!cat) return false;
-    return DIGITAL_CATEGORIES.some(d => cat.toLowerCase().includes(d));
+// ─── Promo Code Configuration ─────────────────────────────────────────────────
+const PROMO_CODES: Record<string, { discount: number; type: 'percent' | 'fixed'; firstOrderOnly: boolean; description: string }> = {
+    'WELCOME10': { discount: 10, type: 'percent', firstOrderOnly: true, description: '10% off your first order' },
+    'BODYBAR10': { discount: 10, type: 'percent', firstOrderOnly: true, description: '10% off your first order' },
+    'FIRST10':   { discount: 10, type: 'percent', firstOrderOnly: true, description: '10% off your first order' },
+};
+
+const DIGITAL_CATEGORIES = ['training programs', 'coaching', 'healthy meals', 'diet-food', 'meal plan', 'meal plans'];
+
+// Check if a product is digital/delivery-included (no shipping needed)
+function isDigitalOrMealPlan(cat: string | undefined, name?: string) {
+    if (!cat && !name) return false;
+    const catLower = (cat || '').toLowerCase();
+    const nameLower = (name || '').toLowerCase();
+    
+    // Meal plans and coaching don't need shipping
+    const digitalKeywords = ['coaching', 'training program', 'healthy meals', 'diet-food', 'meal plan', 'slim bar', 'kudra bar', 'rep max'];
+    
+    return digitalKeywords.some(d => catLower.includes(d) || nameLower.includes(d));
 }
 
 interface GuestInfo {
@@ -45,10 +60,110 @@ export default function Checkout() {
     const [isSuccess,     setIsSuccess]     = useState(false);
     const [error,         setError]         = useState<string | null>(null);
 
-    const hasDigital  = useMemo(() => items.some(i => isDigitalProduct(i.category)), [items]);
-    const shipping    = hasDigital ? 0 : 15;
-    const total       = cartTotal + shipping;
+    // ─── Promo Code State ──────────────────────────────────────────────────────
+    const [promoCode,      setPromoCode]      = useState('');
+    const [appliedPromo,   setAppliedPromo]   = useState<string | null>(null);
+    const [promoError,     setPromoError]     = useState<string | null>(null);
+    const [promoLoading,   setPromoLoading]   = useState(false);
+    const [hasExistingOrders, setHasExistingOrders] = useState<boolean | null>(null);
+
+    // Check if user has existing orders (for first-order-only promos)
+    useEffect(() => {
+        async function checkUserOrders() {
+            if (!user || !supabase) {
+                setHasExistingOrders(null);
+                return;
+            }
+            try {
+                const { count } = await supabase
+                    .from('orders')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', user.id);
+                setHasExistingOrders((count || 0) > 0);
+            } catch {
+                setHasExistingOrders(null);
+            }
+        }
+        checkUserOrders();
+    }, [user]);
+
+    // Calculate discount amount
+    const discountAmount = useMemo(() => {
+        if (!appliedPromo) return 0;
+        const promo = PROMO_CODES[appliedPromo];
+        if (!promo) return 0;
+        if (promo.type === 'percent') {
+            return (cartTotal * promo.discount) / 100;
+        }
+        return promo.discount;
+    }, [appliedPromo, cartTotal]);
+
+    // Check if ALL items are digital/meal plans (no shipping needed)
+    // Shipping is only for physical products like supplements, equipment, gym wear
+    const allDigitalOrMeals = useMemo(() => items.every(i => isDigitalOrMealPlan(i.category, i.name)), [items]);
+    const hasPhysicalProducts = !allDigitalOrMeals && items.length > 0;
+    const shipping    = hasPhysicalProducts ? 15 : 0;
+    const total       = cartTotal - discountAmount + shipping;
     const effectiveMethod = paymentMethod;
+
+    const handleApplyPromo = async () => {
+        const code = promoCode.trim().toUpperCase();
+        setPromoError(null);
+
+        if (!code) {
+            setPromoError('Please enter a promo code');
+            return;
+        }
+
+        const promo = PROMO_CODES[code];
+        if (!promo) {
+            setPromoError('Invalid promo code');
+            return;
+        }
+
+        // Check if code requires first order only
+        if (promo.firstOrderOnly) {
+            if (!user) {
+                setPromoError('Please sign in to use this code — it\'s valid for first orders only');
+                return;
+            }
+
+            setPromoLoading(true);
+            try {
+                // Check if user has any previous orders
+                if (hasExistingOrders === null) {
+                    const { count } = await supabase!
+                        .from('orders')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('user_id', user.id);
+                    setHasExistingOrders((count || 0) > 0);
+                    if ((count || 0) > 0) {
+                        setPromoError('This code is valid for first orders only');
+                        setPromoLoading(false);
+                        return;
+                    }
+                } else if (hasExistingOrders) {
+                    setPromoError('This code is valid for first orders only');
+                    setPromoLoading(false);
+                    return;
+                }
+            } catch {
+                setPromoError('Unable to verify eligibility. Please try again.');
+                setPromoLoading(false);
+                return;
+            }
+            setPromoLoading(false);
+        }
+
+        // Apply the code
+        setAppliedPromo(code);
+        setPromoCode('');
+    };
+
+    const handleRemovePromo = () => {
+        setAppliedPromo(null);
+        setPromoError(null);
+    };
 
     const setField = (key: keyof GuestInfo) => (e: React.ChangeEvent<HTMLInputElement>) =>
         setGuest(g => ({ ...g, [key]: e.target.value }));
@@ -63,6 +178,9 @@ export default function Checkout() {
             // Build order payload — user_id is optional (null for guests)
             const orderPayload: Record<string, any> = {
                 total_amount:     total,
+                subtotal:         cartTotal,
+                discount_amount:  discountAmount,
+                promo_code:       appliedPromo || null,
                 status:           'pending',
                 payment_method:   effectiveMethod === 'cod' ? 'cash_on_delivery' : 'stripe',
                 guest_email:      user ? null : guest.email,
@@ -174,7 +292,7 @@ export default function Checkout() {
                 {/* Mobile: order summary first */}
                 <div className="lg:hidden mb-6">
                     <OrderSummary items={items} cartTotal={cartTotal} shipping={shipping} total={total}
-                        hasDigital={hasDigital} paymentMethod={paymentMethod} />
+                        hasPhysicalProducts={hasPhysicalProducts} paymentMethod={paymentMethod} discountAmount={discountAmount} appliedPromo={appliedPromo} />
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
@@ -245,8 +363,8 @@ export default function Checkout() {
                                     </div>
                                 </div>
 
-                                {/* Shipping info (skip for digital-only) */}
-                                {!hasDigital && (
+                                {/* Shipping info (only for physical products) */}
+                                {hasPhysicalProducts && (
                                     <div className="bg-body-card border border-body-border rounded-2xl p-5">
                                         <h3 className="text-white font-bold text-sm mb-4 flex items-center gap-2">
                                             <span className="size-6 rounded-full bg-white/10 text-gray-400 text-xs font-black flex items-center justify-center">2</span>
@@ -296,6 +414,63 @@ export default function Checkout() {
                                     </div>
                                 </div>
 
+                                {/* Promo Code */}
+                                <div className="bg-body-card border border-body-border rounded-2xl p-5">
+                                    <h3 className="text-white font-bold text-sm mb-4 flex items-center gap-2">
+                                        <Tag size={16} className="text-body-accent" />
+                                        Promo Code
+                                    </h3>
+                                    
+                                    {appliedPromo ? (
+                                        <div className="flex items-center justify-between bg-green-500/10 border border-green-500/30 rounded-xl px-4 py-3">
+                                            <div className="flex items-center gap-3">
+                                                <CheckCircle size={18} className="text-green-500" />
+                                                <div>
+                                                    <p className="text-white font-bold text-sm">{appliedPromo}</p>
+                                                    <p className="text-green-400 text-xs">{PROMO_CODES[appliedPromo]?.description}</p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={handleRemovePromo}
+                                                className="text-gray-400 hover:text-white transition-colors cursor-pointer"
+                                            >
+                                                <X size={18} />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Enter promo code"
+                                                    value={promoCode}
+                                                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                                                    className={`${inputCls} flex-1 uppercase`}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={handleApplyPromo}
+                                                    disabled={promoLoading}
+                                                    className="px-5 py-3 bg-body-secondary border border-body-border text-white font-bold text-sm rounded-xl hover:bg-body-accent hover:text-black hover:border-body-accent transition-colors cursor-pointer disabled:opacity-50"
+                                                >
+                                                    {promoLoading ? <Loader2 size={16} className="animate-spin" /> : 'Apply'}
+                                                </button>
+                                            </div>
+                                            {promoError && (
+                                                <p className="text-red-400 text-xs mt-2 flex items-center gap-1">
+                                                    <X size={12} /> {promoError}
+                                                </p>
+                                            )}
+                                            {!user && (
+                                                <p className="text-gray-500 text-xs mt-2">
+                                                    💡 <Link to="/login" className="text-body-accent hover:underline">Sign in</Link> to use first-order discount codes
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
                                 {/* Submit */}
                                 <button
                                     type="submit"
@@ -320,7 +495,7 @@ export default function Checkout() {
                     <div className="hidden lg:block lg:col-span-2">
                         <div className="sticky top-36">
                             <OrderSummary items={items} cartTotal={cartTotal} shipping={shipping} total={total}
-                                hasDigital={hasDigital} paymentMethod={paymentMethod} />
+                                hasPhysicalProducts={hasPhysicalProducts} paymentMethod={paymentMethod} discountAmount={discountAmount} appliedPromo={appliedPromo} />
                         </div>
                     </div>
                 </div>
@@ -329,9 +504,10 @@ export default function Checkout() {
     );
 }
 
-function OrderSummary({ items, cartTotal, shipping, total, hasDigital, paymentMethod }: {
+function OrderSummary({ items, cartTotal, shipping, total, hasPhysicalProducts, paymentMethod, discountAmount = 0, appliedPromo = null }: {
     items: any[]; cartTotal: number; shipping: number; total: number;
-    hasDigital: boolean; paymentMethod: 'cod' | 'stripe';
+    hasPhysicalProducts: boolean; paymentMethod: 'cod' | 'stripe';
+    discountAmount?: number; appliedPromo?: string | null;
 }) {
     return (
         <div className="bg-body-card border border-body-border rounded-2xl p-5">
@@ -357,18 +533,30 @@ function OrderSummary({ items, cartTotal, shipping, total, hasDigital, paymentMe
                     <span>Subtotal</span>
                     <span className="text-white tabular-nums">AED {cartTotal.toFixed(0)}</span>
                 </div>
-                <div className="flex justify-between text-gray-400">
-                    <span>Shipping</span>
-                    <span className={shipping === 0 ? 'text-green-400 font-bold' : 'text-white tabular-nums'}>
-                        {shipping === 0 ? 'FREE' : `AED ${shipping.toFixed(0)}`}
-                    </span>
-                </div>
-                {!hasDigital && (
-                    <div className="flex justify-between text-gray-500 text-xs">
-                        <span>Payment</span>
-                        <span>{paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}</span>
+                {discountAmount > 0 && (
+                    <div className="flex justify-between text-green-400">
+                        <span className="flex items-center gap-1">
+                            <Tag size={12} />
+                            {appliedPromo}
+                        </span>
+                        <span className="font-bold tabular-nums">−AED {discountAmount.toFixed(0)}</span>
                     </div>
                 )}
+                {shipping === 0 ? (
+                    <div className="flex justify-between text-green-400 text-xs">
+                        <span>Delivery</span>
+                        <span className="font-bold">Included ✓</span>
+                    </div>
+                ) : (
+                    <div className="flex justify-between text-gray-400">
+                        <span>Shipping</span>
+                        <span className="text-white tabular-nums">AED {shipping.toFixed(0)}</span>
+                    </div>
+                )}
+                <div className="flex justify-between text-gray-500 text-xs">
+                    <span>Payment</span>
+                    <span>{paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}</span>
+                </div>
                 <div className="flex justify-between font-black text-base pt-3 border-t border-body-border">
                     <span className="text-white">Total</span>
                     <span className="text-body-accent tabular-nums">AED {total.toFixed(0)}</span>
