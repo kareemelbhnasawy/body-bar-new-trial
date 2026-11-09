@@ -7,7 +7,7 @@ import { Button } from '../components/ui/Button';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
-type DemoTier = 500 | 100;
+type DemoTier = 500 | 100 | 5;
 
 const inputCls =
     'w-full bg-black/30 border border-body-border rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-body-accent';

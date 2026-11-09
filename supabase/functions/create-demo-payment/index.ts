@@ -15,6 +15,7 @@ const corsHeaders = {
 const DEMO_AMOUNTS_CENTS: Record<string, number> = {
   '500': 50000, // 500.00 USD
   '100': 10000, // 100.00 USD
+  '5': 500,     // 5.00 USD
 }
 const DEFAULT_TIER = '500'
 const DEMO_CURRENCY = 'usd'

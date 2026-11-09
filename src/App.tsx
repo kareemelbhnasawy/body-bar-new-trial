@@ -48,6 +48,7 @@ function App() {
               <Route path="checkout" element={<Checkout />} />
               <Route path="demo-payment" element={<DemoPayment tier={500} />} />
               <Route path="demo-payment-100" element={<DemoPayment key="100" tier={100} />} />
+              <Route path="demo-payment-5" element={<DemoPayment key="5" tier={5} />} />
               <Route path="profile" element={<Profile />} />
               <Route path="login" element={<Login />} />
               <Route path="register" element={<Register />} />
