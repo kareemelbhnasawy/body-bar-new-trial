@@ -7,12 +7,12 @@ import { Button } from '../components/ui/Button';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
-const AMOUNT_LABEL = 'USD 500.00';
+type DemoTier = 500 | 100;
 
 const inputCls =
     'w-full bg-black/30 border border-body-border rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-body-accent';
 
-function DemoPaymentForm({ onSuccess }: { onSuccess: () => void }) {
+function DemoPaymentForm({ onSuccess, amountLabel, returnPath }: { onSuccess: () => void; amountLabel: string; returnPath: string }) {
     const stripe = useStripe();
     const elements = useElements();
     const [isProcessing, setIsProcessing] = useState(false);
@@ -27,7 +27,7 @@ function DemoPaymentForm({ onSuccess }: { onSuccess: () => void }) {
 
         const { error } = await stripe.confirmPayment({
             elements,
-            confirmParams: { return_url: `${window.location.origin}/demo-payment?status=complete` },
+            confirmParams: { return_url: `${window.location.origin}${returnPath}?status=complete` },
             redirect: 'if_required',
         });
 
@@ -63,14 +63,16 @@ function DemoPaymentForm({ onSuccess }: { onSuccess: () => void }) {
                         Processing...
                     </div>
                 ) : (
-                    `Pay ${AMOUNT_LABEL}`
+                    `Pay ${amountLabel}`
                 )}
             </Button>
         </form>
     );
 }
 
-export default function DemoPayment() {
+export default function DemoPayment({ tier = 500 }: { tier?: DemoTier }) {
+    const AMOUNT_LABEL = `USD ${tier.toFixed(2)}`;
+    const returnPath = tier === 500 ? '/demo-payment' : `/demo-payment-${tier}`;
     const returnedComplete = new URLSearchParams(window.location.search).get('status') === 'complete';
 
     const [email, setEmail] = useState('');
@@ -89,7 +91,7 @@ export default function DemoPayment() {
         setError(null);
 
         const { data, error: funcErr } = await supabase.functions.invoke('create-demo-payment', {
-            body: { email: email.trim() || undefined },
+            body: { email: email.trim() || undefined, tier: String(tier) },
         });
 
         if (funcErr || !data?.clientSecret) {
@@ -136,7 +138,7 @@ export default function DemoPayment() {
                                 },
                             }}
                         >
-                            <DemoPaymentForm onSuccess={() => setIsSuccess(true)} />
+                            <DemoPaymentForm onSuccess={() => setIsSuccess(true)} amountLabel={AMOUNT_LABEL} returnPath={returnPath} />
                         </Elements>
                     ) : (
                         <form onSubmit={startPayment} className="flex flex-col gap-4">

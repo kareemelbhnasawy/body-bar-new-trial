@@ -46,7 +46,8 @@ function App() {
               <Route path="equipment" element={<Equipment />} />
               <Route path="calculator" element={<Calculator />} />
               <Route path="checkout" element={<Checkout />} />
-              <Route path="demo-payment" element={<DemoPayment />} />
+              <Route path="demo-payment" element={<DemoPayment tier={500} />} />
+              <Route path="demo-payment-100" element={<DemoPayment key="100" tier={100} />} />
               <Route path="profile" element={<Profile />} />
               <Route path="login" element={<Login />} />
               <Route path="register" element={<Register />} />
