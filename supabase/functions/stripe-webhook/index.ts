@@ -24,6 +24,11 @@ serve(async (req) => {
       const paymentIntent = event.data.object as Stripe.PaymentIntent
       const { orderId } = paymentIntent.metadata
 
+      // Payments not tied to an order (e.g. the demo payment page) need no DB update.
+      if (!orderId) {
+        return new Response(JSON.stringify({ received: true }), { status: 200 })
+      }
+
       const supabaseClient = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -50,7 +55,7 @@ serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ received: true }), { status: 200 })
-  } catch (err) {
+  } catch (err: any) {
     console.error(`Webhook Error: ${err.message}`)
     return new Response(`Webhook Error: ${err.message}`, { status: 400 })
   }

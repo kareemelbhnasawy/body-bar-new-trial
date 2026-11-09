@@ -21,6 +21,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import SearchPage from './pages/Search';
 import Admin from './pages/Admin';
+import DemoPayment from './pages/DemoPayment';
 import { AuthProvider } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
 
@@ -45,6 +46,7 @@ function App() {
               <Route path="equipment" element={<Equipment />} />
               <Route path="calculator" element={<Calculator />} />
               <Route path="checkout" element={<Checkout />} />
+              <Route path="demo-payment" element={<DemoPayment />} />
               <Route path="profile" element={<Profile />} />
               <Route path="login" element={<Login />} />
               <Route path="register" element={<Register />} />
